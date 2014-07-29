@@ -14,6 +14,11 @@ class UsersController < ApplicationController
 
     render json: @user
   end
+  
+  def splatts
+    @user = User.find(params[:id])
+    render json: @user.splatts
+  end
 
   # POST /users
   # POST /users.json
