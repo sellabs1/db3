@@ -11,7 +11,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140729223723) do
+ActiveRecord::Schema.define(version: 20140806110105) do
+
+  create_table "follows", force: true do |t|
+    t.integer "follower_id"
+    t.integer "followed_id"
+  end
 
   create_table "splatts", force: true do |t|
     t.string   "body"

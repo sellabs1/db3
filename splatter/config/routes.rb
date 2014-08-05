@@ -3,6 +3,7 @@ Splatter::Application.routes.draw do
   resources :users, except: [:new, :edit]
   get 'users/splatts/:id' => 'users#splatts'
   get 'users/follows/:id' => 'users#show_follows'
+  get 'users/splatts-feed/:id' => 'users#splatts_feed'
   get 'users/followers/:id' => 'users#show_followers'
   post 'users/follows' => 'users#add_follows'
   delete 'users/follows/:id/:follower_id' => 'users#delete_follows'
