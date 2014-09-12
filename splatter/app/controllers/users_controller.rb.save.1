@@ -51,21 +51,6 @@ class UsersController < ApplicationController
     head :no_content
   end
 
-  def validate_user
-    @email = User.where(email: params[:email]).exists?(conditions = :none)
-    if(@email)
-      @password = User.where(email: params[:email], password: params[:password]).exists?(conditions = :none)
-      if(@password)
-        @user = User.find_by(email: params[:email], password: params[:password])
-        render "show"
-      else
-        render "validation failed"
-      end
-    else
-      render "validation failed"
-    end
-  end
-
   # GET /users/splatts-fed/1
   def splatts_feed
     @feed = Splatt.find_by_sql("SELECT splatts.body, splatts.user_id, splatts.created_at FROM splatts JOIN follows ON follows.followed_id=splatts.user_id WHERE follows.follower_id = #{(params[:id])} ORDER BY created_at DESC")
@@ -81,6 +66,14 @@ class UsersController < ApplicationController
     else
       render json: @user.errors, status: :unprocessable_entity
     end
+  end
+  
+  #Validate method
+  def validate_user
+    #render nothing: true ,status: :ok
+    @user = User.find_by(params[:name])
+    
+    
   end
 
   def delete_follows
