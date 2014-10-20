@@ -50,28 +50,27 @@ class UsersController < ApplicationController
 
     head :no_content
   end
-  
-  #Get number of splatts
-  def splatts_count
-    map = %Q{ function() {
-      var length = 0;
-      if(this.splatts) {
-	 length = this.splatts.length
-      }
-      emit("count", length);
-    }
-    }
+
+  	def splatts_count
+		map = %Q{ function () {
+			var length = 0;
+			if(this.splatts) {
+				length = this.splatts.length
+			}
+			emit("count", length);
+		}
+		}
 		
-    reduce = %Q{ function(key, val) {
-      var data = 0;
-      val.forEach(function(v) {
-	data += v;
-      })
-      return data;
-    }
-    }		
-    User.map_reduce(map,reduce).out(inline: true)
-  end
+		reduce = %Q{ function(key, val) {
+			var data = 0;
+			val.forEach(function(v) {
+				data += v;
+			})
+			return data;
+		}
+		}
+				User.map_reduce(map,reduce).out(inline: true)
+end
 
   # GET /users/splatts-feed/1
   def splatts_feed
@@ -79,7 +78,6 @@ class UsersController < ApplicationController
       if(this.splatts){
         emit("feed", {"list": this.splatts})
       }
-    }
     }
 
     reduce = %Q{ function(key, val) {
@@ -100,11 +98,14 @@ class UsersController < ApplicationController
         return {"list": mylist};
       }
     }
-    
+
     user = User.find(params[:id])
     result = User.in(id: user.follow_ids).map_reduce(map, reduce).out(inline: true).finalize(finalise)
     render json: result.entries[0][:value][:list]    
 
+    #User.map_reduce(map,reduce).out(inline: true).each do |x|
+    # puts x
+    # end
   end
 
   def add_follows
@@ -137,7 +138,7 @@ class UsersController < ApplicationController
 
   def show_followers
     @user = User.find(params[:id])
-    render json: @user.followers
+    render json: @user.followed_by
   end
 
   def splatts
@@ -146,7 +147,7 @@ class UsersController < ApplicationController
   end
 
   private
-  def user_params(params)
+    def user_params(params)
     params.permit(:email, :password, :name, :blurb)
   end
 
