@@ -4,31 +4,32 @@ class UsersController < ApplicationController
 
   # GET /users
   # GET /users.json
-  def index
-    @users = User.all
+    def index
+        @users = User.all
 
-    render json: @users
-  end
-
-  # GET /users/1
-  # GET /users/1.json
-  def show
-    @user = User.find(params[:id])
-
-    render json: @user
-  end
-
-  # POST /users
-  # POST /users.json
-  def create
-    @user = User.new(user_params(params[:user]))
-
-    if @user.save
-      render json: @user, status: :created, location: @user
-    else
-      render json: @user.errors, status: :unprocessable_entity
+        render json: @users
     end
-  end
+
+        def create
+            @user = User.new
+            @user.email = params[:email]
+            @user.name = params[:name]
+            @user.password = params[:password]
+            @user.blurb = params[:blurb]
+            db = UserRepository.new(Riak::Client.new)
+            if db.save(@user)
+                render json: @user, status: :created, location: @user
+            else
+                render json: "error", status: :unprocessable_entity
+            end
+        end
+
+        def show
+            db = UserRepository.new(Riak::Client.new)
+            @user = db.find(params[:id])
+            render json: @user
+        end
+
 
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
