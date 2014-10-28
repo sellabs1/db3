@@ -6,7 +6,7 @@ class UserRepository
 	end
         
         def all
-
+            @users = client.find(BUCKET).objects
         end
 
         def delete(user)
@@ -31,13 +31,13 @@ class UserRepository
 	
 	    unless users.exists?(key)
 	        riak_obj = users.new(key)
-		    riak_obj.data = user
-		    riak_obj.content_type = 'application/json'
-		    riak_obj.store
+		riak_obj.data = user
+		riak_obj.content_type = 'application/json'
+		riak_obj.store
 	    end
         end
 
 	def update(user)
-	
+	    
 	end
 end
