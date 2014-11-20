@@ -32,7 +32,6 @@ class UsersController < ApplicationController
         render json: @user
     end
 
-
 #   PATCH/PUT /users/1
 #   PATCH/PUT /users/1.json
     def update
@@ -50,9 +49,7 @@ class UsersController < ApplicationController
 #   DELETE /users/1.json
     def destroy
         db = UserRepository.new(Riak::Client.new)
-        @user = db.find(params[:id])
-        @user.destroy
-
+        db.delete(params[:id])
         head :no_content
     end
 
@@ -74,45 +71,53 @@ class UsersController < ApplicationController
 
 #   GET /users/splatts-feed/1
     def splatts_feed
-        @feed = Splatt.find_by_sql("SELECT splatts.body, splatts.user_id, splatts.created_at FROM splatts JOIN follows ON follows.followed_id=splatts.user_id WHERE follows.follower_id = #{(params[:id])} ORDER BY created_at DESC")
+        @id = params[:id]
+        db = UserRepository.new(Riak::Client.new)
+        @feed = db.splatts_feed(@id) 
         render json: @feed
     end
 
+#   POST /users/follows
     def add_follows
-        @user = User.find(params[:id])
-        @followed = User.find(params[:follows_id])
-
-        if @user.follows << @followed
-            head :no_content
-        else
-            render json: @user.errors, status: :unprocessable_entity
-        end
+        db = UserRepository.new(Riak::Client.new)
+        @follower = db.find(params[:id])
+        @followed = db.find(params[:follows_id]
+        
+	if db.follow(@follower, @followed)
+	    head :no_content
+	else
+	    render json: "error adding follows", status: :unprocessable_entity
+	end
     end
 
-#   DELETE /users/follows1/2
+#   DELETE /users/follows/1/2
     def delete_follows
-        @user = User.find(params[:id])
-        @follows = User.find(params[:follows_id])
+        db = UserRepository.new(Riak::Client.new)
+        @user = db.find(params[:id])
+        @follows = db.find(params[:follows_id])
 
-        if @user.follows.delete(@follows)
+        if db.unfollow(@user, @follows)
             head :no_content
         else
-            render json: @user.errors, status: :unprocessable_entity
+            render json: "error deleting follows", status: :unprocessable_entity
         end
     end
 
 #   GET /users/follows/1
     def show_follows
-        @user = User.find(params[:id])
+        db = UserRepository.new(Riak::Client.new)
+        @user = db.find(params[:id])
         render json: @user.follows
     end
 
 #   GET /users/followers/1
     def show_followers
-        @user = User.find(params[:id])
-        render json: @user.followed_by
+        db = UserRepository.new(Riak::Client.new)
+        @user = db.find(params[:id])
+        render json: @user.followers
     end
 
+#   POST /users/splatts
     def splatts
         db = UserRepository.new(Riak::Client.new)
         @user = db.find(params[:id])

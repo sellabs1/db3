@@ -4,15 +4,19 @@ class UserRepository
 	def initialize(client)
 	    @client = client
 	end
-        
+
+#	Show all method        
         def all
-            @users = client.find(BUCKET).objects
+            users = @client.bucket(BUCKET)
         end
 
+#	Delete method
         def delete(user)
-
+	    @users = @client.find(BUCKET)
+            @users.delete(user)
         end
 
+#	Find method
         def find(key)
             riak_obj = @client.bucket(BUCKET)[key]
             user = User.new
@@ -25,6 +29,7 @@ class UserRepository
 	    user
 	end
 
+#	Save method
 	def save(user)
             users = @client.bucket(BUCKET)
 	    key = user.email
@@ -37,7 +42,65 @@ class UserRepository
 	    end
         end
 
+#	Update method
 	def update(user)
-	    
+	    @key = user.email
+	    @users = @client.find(key)
+	    @user.data = user
+	    @user.store
 	end
+
+#	Follow method
+	def follow(follower, followed)
+	    if follower.follows
+	        follower.follows << followed.email
+	    else
+	        follower.follows = [followed.email]
+	    end
+
+	    if followed.followers
+	        followed.followers << follower.email
+	    else
+	        followed.followers = [follows.email]
+	    end
+
+	    update(followed)
+	    update(follower)
+	end
+
+#	Unfollow method
+	def unfollow(follower, followed)
+            if follower.follows
+                follower.follows.delete(followed.email)
+            else
+                follower.follows = [followed.email]
+            end
+
+            if followed.followers
+                followed.followers.delete(follower.email)
+            else
+                followed.followers = [follows.email]
+            end
+
+            update(followed)
+            update(follower)
+        end
+	
+	def splatts_feed(key)
+    	    @feed = [];
+    	    @user = find(key)
+    	    user_db = SplattRepository.new(@client, @user)
+    	    @feed.concat(user_db.all)
+    	    if @user.follows
+                @user.follows.each do |follower|
+                    flwr = find(follower)
+                    flwr_db = SplattRepository.new(@client, flwr)
+                    @feed.concat(flwr_db.all)
+                end
+            end
+
+    	    @feed.sort! { |a,b| a.updated_at <=> b.updated_at }
+    	    @feed
+  	end
+
 end

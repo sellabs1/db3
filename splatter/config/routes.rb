@@ -3,12 +3,12 @@ Splatter::Application.routes.draw do
   get 'users/:id' => 'users#show', :constraints => {:id => /[0-9A-Za-z\-\.\@]+/ }  
   resources :users, except: [:new, :edit]
   get 'users/splatts/:id' => 'users#splatts', :constraints => { :id => /[0-9A-Za-z\-\.\@]+/ }
-  get 'users/follows/:id' => 'users#show_follows'
-  get 'users/splatts-feed/:id' => 'users#splatts_feed'
-  get 'users/followers/:id' => 'users#show_followers'
+  get 'users/follows/:id' => 'users#show_follows', :constraints => { :id => /[0-9A-Za-z\-\.\@]+/ }
+  get 'users/splatts-feed/:id' => 'users#splatts_feed', :constraints => { :id => /[0-9A-Za-z\-\.\@]+/ }
+  get 'users/followers/:id' => 'users#show_followers', :constraints => {:id => /[0-9A-Za-z\-\.\@]+/ }
   post 'users/validate' => 'users#validate_user'  
   post 'users/follows' => 'users#add_follows'
-  delete 'users/follows/:id/:follows_id' => 'users#delete_follows'
+  delete 'users/follows/:id/:follows_id' => 'users#delete_follows', :constraints => { :id => /[0-9A-Za-z\-\.\@]+/ }
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
